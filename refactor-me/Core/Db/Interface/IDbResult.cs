@@ -1,23 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace refactor_me.Core.Db.Interface
+﻿namespace refactor_me.Core.Db.Interface
 {
-	enum Status {
+	public enum Status {
 		Success,
 		Fail,
-		Rollback
 	}
 
-	interface IDbResult
+	public interface IDbResult
 	{
 		/// <summary>
-		/// Gets the <see cref="Status"/> of the query
+		/// Gets the <see cref="Interface.Status"/> of the query
 		/// </summary>
-		Status status { get; }
+		Status Status { get; }
 
 	}
 }

@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
-
+using refactor_me.Core.Db.Interface;
 using refactor_me.Core.Interface;
-using refactor_me.Models;
 using refactor_me.Models.Interface;
 
 namespace refactor_me.Core
@@ -13,55 +10,35 @@ namespace refactor_me.Core
 	{
 		private readonly IProductsRepo _prodRepo;
 		private readonly IProductOptionHandler _productOptionHandler;
-
+		private readonly IDbHandler _dbHandler;
 		public ProductHandler(IProductsRepo prodRep)
 		{
 			_prodRepo = prodRep;
 			_productOptionHandler = prodRep.GetProductOptionHandler();
+			_dbHandler = prodRep.GetDbHandler();
 		}
 
 		public void Save(IProduct product)
 		{
-			var conn = Helpers.NewConnection();
-			var cmd = product.IsNew ?
-				new SqlCommand($"insert into product (id, name, description, price, deliveryprice) values ('{product.Id}', '{product.Name}', '{product.Description}', {product.Price}, {product.DeliveryPrice})", conn) :
-				new SqlCommand($"update product set name = '{product.Name}', description = '{product.Description}', price = {product.Price}, deliveryprice = {product.DeliveryPrice} where id = '{product.Id}'", conn);
-
-			conn.Open();
-			cmd.ExecuteNonQuery();
+			 _dbHandler.Execute<IProduct, IDbResult>("SaveProduct", product);
 		}
 
 		public void Delete(Guid id)
 		{
 			foreach (var option in _prodRepo.GetNewProductOptions().WhereProdIdIs(id.ToString()).Items)
-				_productOptionHandler.Delete(option.Id);
+				_dbHandler.Execute<Guid, IDbResult>("DeleteProductOp", option.Id);
 
-			var conn = Helpers.NewConnection();
-			conn.Open();
-			var cmd = new SqlCommand($"delete from product where id = '{id}'", conn);
-			cmd.ExecuteNonQuery();
+			_dbHandler.Execute<Guid, IDbResult>("DeleteProduct", id);
 		}
 
 		/// <summary>
 		/// Gets products from store
 		/// </summary>
 		/// <returns><see cref="IList{IProduct}"/></returns>
-		public IList<IProduct> GetProducts(string nameFilter)
+		public IList<IProduct> GetProducts(string name)
 		{
-			var items = new List<IProduct>();
-			var conn = Helpers.NewConnection();
-			var cmd = new SqlCommand($"select * from product {nameFilter}", conn);
-			conn.Open();
-
-			var rdr = cmd.ExecuteReader();
-			while (rdr.Read())
-			{
-				var prod = _prodRepo.GetNewProduct();
-				PopulateProduct(rdr, prod);
-				items.Add(prod);
-			}
-
-			return items;
+			var result = _dbHandler.Execute<string, IResultSet<IProduct>>("Products", name) as IResultSet<IProduct>;
+			return result.Items;
 		}
 
 		/// <summary>
@@ -72,25 +49,9 @@ namespace refactor_me.Core
 		public IProduct GetProduct(Guid id)
 		{
 			var prod = _prodRepo.GetNewProduct();
-			var conn = Helpers.NewConnection();
-			var cmd = new SqlCommand($"select * from product where id = '{id}'", conn);
-			conn.Open();
+			var result = _dbHandler.Execute<Guid, IResultSet<IProduct>>("Product", id) as IResultSet<IProduct>;
 
-			var rdr = cmd.ExecuteReader();
-			if (!rdr.Read())
-				return prod;
-			PopulateProduct(rdr, prod);
-			return prod;
-		}
-
-		private static void PopulateProduct(SqlDataReader rdr, IProduct prod)
-		{
-			prod.IsNew = false;
-			prod.Id = Guid.Parse(rdr["Id"].ToString());
-			prod.Name = rdr["Name"].ToString();
-			prod.Description = (DBNull.Value == rdr["Description"]) ? null : rdr["Description"].ToString();
-			prod.Price = decimal.Parse(rdr["Price"].ToString());
-			prod.DeliveryPrice = decimal.Parse(rdr["DeliveryPrice"].ToString());
+			return result.Items.Count == 0 ? prod : result.Items[0];
 		}
 	}
 }

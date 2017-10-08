@@ -85,7 +85,7 @@ namespace refactor_me.Controllers
 		[HttpGet]
 		public IProductOption GetOption(Guid productId, Guid id)
 		{
-			var option = _prodRepo.GetNewProductOption();
+			var option = _prodOptionHandler.GetProductOption(id);
 			if (option.IsNew)
 				throw new HttpResponseException(HttpStatusCode.NotFound);
 

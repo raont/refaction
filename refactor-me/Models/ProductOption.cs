@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Web;
 using Newtonsoft.Json;
 
 namespace refactor_me.Models
@@ -24,24 +20,6 @@ namespace refactor_me.Models
 		{
 			Id = Guid.NewGuid();
 			IsNew = true;
-		}
-
-		public ProductOption(Guid id)
-		{
-			IsNew = true;
-			var conn = Helpers.NewConnection();
-			var cmd = new SqlCommand($"select * from productoption where id = '{id}'", conn);
-			conn.Open();
-
-			var rdr = cmd.ExecuteReader();
-			if (!rdr.Read())
-				return;
-
-			IsNew = false;
-			Id = Guid.Parse(rdr["Id"].ToString());
-			ProductId = Guid.Parse(rdr["ProductId"].ToString());
-			Name = rdr["Name"].ToString();
-			Description = (DBNull.Value == rdr["Description"]) ? null : rdr["Description"].ToString();
 		}
 	}
 }

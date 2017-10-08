@@ -26,7 +26,7 @@ namespace refactor_me.Models
 		/// <returns><see cref="ProductOptions"/></returns>
 		public IProductOptions WhereProdIdIs(string productId)
 		{
-			_prodIdFilter = $"where productid = '{productId}'";
+			_prodIdFilter = productId;
 			return this;
 		}
 	}

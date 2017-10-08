@@ -1,4 +1,6 @@
 ﻿using System.Web.Http.Dependencies;
+using refactor_me.Core.Db;
+using refactor_me.Core.Db.Interface;
 using refactor_me.Models;
 using refactor_me.Models.Interface;
 
@@ -45,6 +47,32 @@ namespace refactor_me.Core.Interface
 		/// <returns><see cref="IProductOptions"/></returns>
 		IProductOptions GetNewProductOptions();
 
-		void Initilize(IDependencyResolver ioc);
+		/// <summary>
+		/// Gets an instance of the dmls based on the <paramref name="dml"/> name
+		/// </summary>
+		/// <param name="param">Parameters to be passed to dml</param>
+		/// <returns><see cref="IProductOptions"/></returns>
+		IDml<R> GetDml<T, R>(string dml, T param) where R : IDbResult;
+
+		/// <summary>
+		/// Gets an instance of the dbHandler
+		/// </summary>
+		/// <returns><see cref="IDbHandler"/></returns>
+		IDbHandler GetDbHandler();
+
+		/// <summary>
+		/// Gets an instance of the <see cref="IResultSet{T}"/>
+		/// </summary>
+		/// <returns><see cref="IResultSet{T}"/></returns>
+		IResultSet<T> GetProdResult<T>(Status status);
+
+		/// <summary>
+		/// Gets an instance of the <see cref="IDbHelper"/>
+		/// </summary>
+		/// <returns><see cref="IDbHelper"/></returns>
+		IDbHelper GetDbHelper();
+
+		void Initilize(IIoc ioc);
+		
 	}
 }

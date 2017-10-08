@@ -30,7 +30,7 @@ namespace refactor_me.Models
 		/// <returns><see cref="IProducts"/></returns>
 		public IProducts WhereNameIs(string name)
 		{
-			_nameFilter = $"where lower(name) like '%{name.ToLower()}%'";
+			_nameFilter = name;
 			return this;
 		}
 	}

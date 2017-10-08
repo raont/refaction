@@ -11,15 +11,16 @@ namespace refactor_me.Core
 	/// Ioc container, Handles the lifecyle of an Ioc
 	/// Depends on Structure Map
 	/// </summary>
-	public class Ioc : IDependencyResolver
+	public class Ioc : IIoc
 	{
-		private static IContainer _repo;
+		public IContainer Repo { get; }
+
 		private readonly Action<ConfigurationExpression> _action;
 		
 		public Ioc(Action<ConfigurationExpression> action)
 		{
 			_action = action;
-			_repo = new Container(_action);
+			Repo = new Container(_action);
 		}
 
 		public void Dispose()
@@ -31,7 +32,7 @@ namespace refactor_me.Core
 		{
 			try
 			{
-				return _repo.GetInstance(serviceType);
+				return Repo.GetInstance(serviceType);
 			}
 			catch(StructureMapConfigurationException)
 			{
@@ -43,7 +44,7 @@ namespace refactor_me.Core
 		{
 			try
 			{
-				return _repo.GetAllInstances(serviceType).Cast<object>();
+				return Repo.GetAllInstances(serviceType).Cast<object>();
 			}
 			catch (StructureMapConfigurationException)
 			{

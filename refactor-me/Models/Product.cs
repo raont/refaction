@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data.SqlClient;
 using Newtonsoft.Json;
 using refactor_me.Models.Interface;
 
